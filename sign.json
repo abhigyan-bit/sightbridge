@@ -1,0 +1,312 @@
+{
+  "vocabulary": [
+    {
+      "id": "HEART SHAPE",
+      "visual": "🫶",
+      "musical_note": "E5",
+      "sound_frequency": 659.25,
+      "sound_type": "sine",
+      "asl_description": "Both hands joined touching thumbs and index fingers to form a heart",
+      "translations": {
+        "en-US": "I love and cherish you deeply.",
+        "hi-IN": "मैं आपको दिल से चाहता हूँ।",
+        "es-ES": "Te quiero con todo mi corazón.",
+        "fr-FR": "Je t'aime de tout mon cœur.",
+        "de-DE": "Ich liebe dich von ganzem Herzen.",
+        "ja-JP": "心から愛しています。",
+        "ar-SA": "أحبك من كل قلبي."
+      }
+    },
+    {
+      "id": "Togetherness / Unity",
+      "visual": "🤝",
+      "musical_note": "E5",
+      "sound_frequency": 659.25,
+      "sound_type": "sine",
+      "asl_description": "Both hands joined together in a gesture of unity",
+      "translations": {
+        "en-US": "I love and cherish you deeply.",
+        "hi-IN": "मैं आपको दिल से चाहता हूँ।",
+        "es-ES": "Te quiero con todo mi corazón.",
+        "fr-FR": "Je t'aime de tout mon cœur.",
+        "de-DE": "Ich liebe dich von ganzem Herzen.",
+        "ja-JP": "心から愛しています。",
+        "ar-SA": "أحبك من كل قلبي."
+      }
+    },
+    {
+      "id": "NAMASTE / PRAYER",
+      "visual": "🙏",
+      "musical_note": "F5",
+      "sound_frequency": 698.46,
+      "sound_type": "sine",
+      "asl_description": "Both flat hands pressed together in respect",
+      "translations": {
+        "en-US": "Namaste / Respectful greetings to you.",
+        "hi-IN": "नमस्ते, आपको मेरा सादर प्रणाम।",
+        "es-ES": "Namasté / Saludos cordiales.",
+        "fr-FR": "Namasté / Salutations respectueuses.",
+        "de-DE": "Namaste / Herzliche Grüße.",
+        "ja-JP": "ナマステ / 心からのご挨拶。",
+        "ar-SA": "تحياتي واحترامي لك."
+      }
+    },
+    {
+      "id": "TIME OUT / PAUSE",
+      "visual": "⏸️",
+      "musical_note": "A#4",
+      "sound_frequency": 466.16,
+      "sound_type": "triangle",
+      "asl_description": "One flat hand perpendicular over the other forming a 'T'",
+      "translations": {
+        "en-US": "Please pause / Let us take a moment.",
+        "hi-IN": "कृपया रुकिए / थोड़ा विराम लेते हैं।",
+        "es-ES": "Por favor espera un momento.",
+        "fr-FR": "Faisons une pause s'il vous plaît.",
+        "de-DE": "Bitte kurz pausieren.",
+        "ja-JP": "少し待ってください。",
+        "ar-SA": "يرجى الانتظار قليلاً."
+      }
+    },
+    {
+      "id": "OK / PERFECT",
+      "visual": "👌",
+      "musical_note": "F#4",
+      "sound_frequency": 369.99,
+      "sound_type": "sine",
+      "asl_description": "Index and thumb form an O circle, other three fingers up",
+      "translations": {
+        "en-US": "Everything is perfect and approved.",
+        "hi-IN": "सब कुछ बिल्कुल सही और उत्तम है।",
+        "es-ES": "Todo está perfecto y aprobado.",
+        "fr-FR": "Tout est parfait.",
+        "de-DE": "Alles ist perfekt.",
+        "ja-JP": "完璧です、了解しました。",
+        "ar-SA": "كل شيء ممتاز ومثالي."
+      }
+    },
+    {
+      "id": "L-SHAPE / DIRECTION",
+      "visual": "👉",
+      "musical_note": "A4",
+      "sound_frequency": 440.00,
+      "sound_type": "triangle",
+      "asl_description": "Thumb and index extended at 90 degrees forming an L",
+      "translations": {
+        "en-US": "Look in that direction.",
+        "hi-IN": "उस दिशा में देखिए।",
+        "es-ES": "Mira en esa dirección.",
+        "fr-FR": "Regardez dans cette direction.",
+        "de-DE": "In diese Richtung schauen.",
+        "ja-JP": "あちらの方向を見てください。",
+        "ar-SA": "انظر في ذلك الاتجاه."
+      }
+    },
+    {
+      "id": "PINKY PROMISE",
+      "visual": "🤙",
+      "musical_note": "D5",
+      "sound_frequency": 587.33,
+      "sound_type": "sine",
+      "asl_description": "Only pinky finger extended upright",
+      "translations": {
+        "en-US": "I give you my promise.",
+        "hi-IN": "मैं आपसे वादा करता हूँ।",
+        "es-ES": "Te doy mi promesa.",
+        "fr-FR": "Je te le promets.",
+        "de-DE": "Ich verspreche es dir.",
+        "ja-JP": "約束します。",
+        "ar-SA": "أعدك بذلك."
+      }
+    },
+    {
+      "id": "FOUR FINGERS / FOUR",
+      "visual": "🖖",
+      "musical_note": "B4",
+      "sound_frequency": 493.88,
+      "sound_type": "triangle",
+      "asl_description": "Four fingers straight up with thumb tucked",
+      "translations": {
+        "en-US": "Count four / Four items.",
+        "hi-IN": "चार (4)।",
+        "es-ES": "Cuatro.",
+        "fr-FR": "Quatre.",
+        "de-DE": "Vier.",
+        "ja-JP": "四番目。",
+        "ar-SA": "أربعة."
+      }
+    },
+    {
+      "id": "OPEN PALM / HELLO",
+      "visual": "🖐️",
+      "musical_note": "C4",
+      "sound_frequency": 261.63,
+      "sound_type": "sine",
+      "asl_description": "All 5 fingers open wide facing camera",
+      "translations": {
+        "en-US": "Hello, pleased to meet you.",
+        "hi-IN": "नमस्ते, आपसे मिलकर खुशी हुई।",
+        "es-ES": "Hola, encantado de conocerte.",
+        "fr-FR": "Bonjour, ravi de vous rencontrer.",
+        "de-DE": "Hallo, freut mich.",
+        "ja-JP": "こんにちは。",
+        "ar-SA": "مرحبا بك."
+      }
+    },
+    {
+      "id": "CLOSED FIST / YES",
+      "visual": "✊",
+      "musical_note": "D4",
+      "sound_frequency": 293.66,
+      "sound_type": "triangle",
+      "asl_description": "All fingers tightly curled into a fist",
+      "translations": {
+        "en-US": "Yes, absolutely.",
+        "hi-IN": "हाँ, बिल्कुल।",
+        "es-ES": "Sí, totalmente.",
+        "fr-FR": "Oui, tout à fait.",
+        "de-DE": "Ja, absolut.",
+        "ja-JP": "はい、その通りです。",
+        "ar-SA": "نعم، بالتأكيد."
+      }
+    },
+    {
+      "id": "THUMBS UP / GOOD",
+      "visual": "👍",
+      "musical_note": "E4",
+      "sound_frequency": 329.63,
+      "sound_type": "sine",
+      "asl_description": "Fist with only thumb pointed upright",
+      "translations": {
+        "en-US": "Good / Everything is fine.",
+        "hi-IN": "बहुत अच्छा / सब ठीक है।",
+        "es-ES": "Bien, todo va bien.",
+        "fr-FR": "Bien, tout va bien.",
+        "de-DE": "Gut, alles prima.",
+        "ja-JP": "いいね！",
+        "ar-SA": "جيد جداً."
+      }
+    },
+    {
+      "id": "THUMBS DOWN / NO",
+      "visual": "👎",
+      "musical_note": "A3",
+      "sound_frequency": 220.00,
+      "sound_type": "sawtooth",
+      "asl_description": "Fist with only thumb pointing downward",
+      "translations": {
+        "en-US": "No, I do not agree.",
+        "hi-IN": "नहीं, मैं असहमत हूँ।",
+        "es-ES": "No, no me gusta.",
+        "fr-FR": "Non, pas d'accord.",
+        "de-DE": "Nein, nicht einverstanden.",
+        "ja-JP": "いいえ。",
+        "ar-SA": "لا، لا أوافق."
+      }
+    },
+    {
+      "id": "INDEX POINT / ONE",
+      "visual": "☝️",
+      "musical_note": "F4",
+      "sound_frequency": 349.23,
+      "sound_type": "triangle",
+      "asl_description": "Single index finger pointed straight up",
+      "translations": {
+        "en-US": "Number one / Please pay attention.",
+        "hi-IN": "नंबर एक / कृपया ध्यान दें।",
+        "es-ES": "Número uno / Atención.",
+        "fr-FR": "Numéro un / Attention.",
+        "de-DE": "Nummer eins.",
+        "ja-JP": "一番目です。",
+        "ar-SA": "رقم واحد."
+      }
+    },
+    {
+      "id": "VICTORY / PEACE",
+      "visual": "✌️",
+      "musical_note": "G4",
+      "sound_frequency": 392.00,
+      "sound_type": "sine",
+      "asl_description": "Index and middle fingers extended in a V",
+      "translations": {
+        "en-US": "Peace and good vibes.",
+        "hi-IN": "शांति और सकारात्मकता।",
+        "es-ES": "Paz y armonía.",
+        "fr-FR": "Paix et sérénité.",
+        "de-DE": "Frieden.",
+        "ja-JP": "平和。",
+        "ar-SA": "سلام."
+      }
+    },
+    {
+      "id": "THREE FINGERS / WATER",
+      "visual": "🤟",
+      "musical_note": "A4",
+      "sound_frequency": 440.00,
+      "sound_type": "sine",
+      "asl_description": "Index, middle, and ring fingers up",
+      "translations": {
+        "en-US": "Could I please get drinking water?",
+        "hi-IN": "क्या मुझे पीने का पानी मिल सकता है?",
+        "es-ES": "¿Me da agua por favor?",
+        "fr-FR": "Puis-je avoir de l'eau?",
+        "de-DE": "Könnte ich bitte Wasser bekommen?",
+        "ja-JP": "お水をください。",
+        "ar-SA": "هل لي بماء للشرب؟"
+      }
+    },
+    {
+      "id": "I LOVE YOU",
+      "visual": "🤟",
+      "musical_note": "B4",
+      "sound_frequency": 493.88,
+      "sound_type": "sine",
+      "asl_description": "Thumb, index, and pinky upright",
+      "translations": {
+        "en-US": "I appreciate and love you.",
+        "hi-IN": "मैं आपसे प्रेम करता हूँ।",
+        "es-ES": "Te quiero y te aprecio.",
+        "fr-FR": "Je vous aime.",
+        "de-DE": "Ich liebe dich.",
+        "ja-JP": "愛しています。",
+        "ar-SA": "أنا أحبك."
+      }
+    },
+    {
+      "id": "ROCK ON",
+      "visual": "🤘",
+      "musical_note": "C5",
+      "sound_frequency": 523.25,
+      "sound_type": "sawtooth",
+      "asl_description": "Index and pinky up only; thumb locked across palm",
+      "translations": {
+        "en-US": "Awesome, that rocks!",
+        "hi-IN": "अद्भुत, बहुत बढ़िया!",
+        "es-ES": "¡Genial, es increíble!",
+        "fr-FR": "Génial, c'est super!",
+        "de-DE": "Klasse, das rockt!",
+        "ja-JP": "最高です！",
+        "ar-SA": "رائع!"
+      }
+    },
+    {
+      "id": "CALL ME / SHAKA",
+      "visual": "🤙",
+      "musical_note": "D5",
+      "sound_frequency": 587.33,
+      "sound_type": "triangle",
+      "asl_description": "Thumb and pinky extended, middle 3 curled",
+      "translations": {
+        "en-US": "Please call or contact me soon.",
+        "hi-IN": "कृपया मुझे जल्द संपर्क करें।",
+        "es-ES": "Por favor llámame pronto.",
+        "fr-FR": "Appelle-moi bientôt s'il te plaît.",
+        "de-DE": "Bitte ruf mich an.",
+        "ja-JP": "後で連絡してください。",
+        "ar-SA": "اتصل بي قريباً."
+        
+        
+      }
+    }
+  ]
+}

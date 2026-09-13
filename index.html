@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SIGNBRIDGE AI // DUAL COMMUNICATOR & GESTURE SYNTHESIZER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<!-- MediaPipe Hands & Camera CDNs -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="sign.js"></script>
+<style>
+  :root {
+    --bg: #070a12;
+    --card: #0f172a;
+    --card-border: #1e293b;
+    --primary: #38bdf8;
+    --primary-glow: rgba(56, 189, 248, 0.35);
+    --accent: #a855f7;
+    --success: #10b981;
+    --danger: #f43f5e;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --font-main: 'Plus Jakarta Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    min-height: 100vh;
+    padding: 18px;
+    background-image: 
+      radial-gradient(ellipse at 15% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 100%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+  }
+
+  .app-wrap { max-width: 1440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Top Nav */
+  .top-nav {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .brand-group { display: flex; align-items: center; gap: 12px; }
+  .brand-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px var(--primary-glow);
+  }
+  .brand-group h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .brand-group p { font-size: 11px; color: var(--muted); }
+
+  .nav-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  
+  .tool-btn {
+    background: #080c14;
+    border: 1.5px solid var(--card-border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    transition: 0.2s;
+  }
+  .tool-btn.active {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.3);
+  }
+
+  .select-box {
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: var(--font-main);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* Main Grid */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 16px;
+  }
+  @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .deck {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .deck-header { display: flex; justify-content: space-between; align-items: center; }
+  .deck-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--font-mono);
+  }
+
+  /* Video Stage */
+  .video-stage {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #webcam {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+  }
+  #trackingCanvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    z-index: 2;
+  }
+
+  .gesture-hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    background: rgba(8, 12, 20, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--card-border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pulse-dot {
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: blink 1.2s infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .stats-hud {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    background: rgba(8, 12, 20, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--card-border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .stats-hud b { color: var(--success); }
+
+  /* Interactive Piano Roll Display */
+  .piano-roll {
+    display: flex;
+    gap: 4px;
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .piano-key {
+    flex: 1;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 10px 4px;
+    text-align: center;
+    border-radius: 4px;
+    transition: 0.15s;
+  }
+  .piano-key.active {
+    background: linear-gradient(180deg, var(--primary), var(--accent));
+    color: #fff;
+    box-shadow: 0 0 14px var(--primary-glow);
+    transform: translateY(2px);
+  }
+
+  /* Real-time Oscilloscope Canvas */
+  .visualizer-container {
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    height: 50px;
+    overflow: hidden;
+  }
+  #audioScopeCanvas { width: 100%; height: 100%; display: block; }
+
+  /* Output Cards */
+  .live-transcript-box {
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .box-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .active-sentence {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+    min-height: 42px;
+  }
+  .gesture-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-height: 26px;
+  }
+  .pill {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 16px;
+  }
+
+  .control-row { display: flex; gap: 10px; }
+  .btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #000;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+  }
+
+  /* Channel B Sign Visualizer */
+  .sign-visualizer-box {
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .sign-illustration { font-size: 70px; animation: popInOut 0.3s ease; }
+  @keyframes popInOut { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .sign-word-display {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin-top: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .audio-feed-box {
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mic-toggle-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    background: #1e293b;
+    color: var(--text);
+    border: 1px solid var(--card-border);
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.2s;
+  }
+  .mic-toggle-btn.recording {
+    background: rgba(244, 63, 94, 0.15);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+  <div class="top-nav">
+    <div class="brand-group">
+      <div class="brand-icon">🤟</div>
+      <div>
+        <h1>SignBridge AI</h1>
+        <p>Dual-Hand Communicator & Gesture Synthesizer</p>
+      </div>
+    </div>
+    <div class="nav-controls">
+      <button class="tool-btn active" id="musicToggleBtn" onclick="toggleMusicMode()">🎵 Sonic Audio: ON</button>
+      <select class="select-box" id="instrumentSelect" onchange="changeInstrument()">
+        <option value="sine">Pure Synth Tone</option>
+        <option value="triangle">Warm Piano</option>
+        <option value="sawtooth">8-Bit Lead</option>
+        <option value="square">Bass Organ</option>
+      </select>
+      <select class="select-box" id="targetLangSelect" onchange="changeLanguage()">
+        <option value="en-US">English (Global)</option>
+        <option value="hi-IN">Hindi (India)</option>
+        <option value="es-ES">Spanish (Español)</option>
+        <option value="fr-FR">French (Français)</option>
+        <option value="de-DE">German (Deutsch)</option>
+        <option value="ja-JP">Japanese (日本語)</option>
+        <option value="ar-SA">Arabic (العربية)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- Channel A -->
+    <div class="deck">
+      <div class="deck-header">
+        <div class="deck-title"><span>📡 CHANNEL A:</span> Dual-Hand Signs $\to$ Voice / Music</div>
+        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--success);" id="cameraStatus">INITIALIZING</span>
+      </div>
+
+      <div class="video-stage">
+        <div class="gesture-hud">
+          <div class="pulse-dot"></div>
+          <span id="detectedGestureLabel">SEARCHING FOR HANDS...</span>
+        </div>
+
+        <div class="stats-hud">
+          Hands: <b id="dbgHands">0</b> | Fingertips: <b id="dbgFingers">0</b>
+        </div>
+
+        <video id="webcam" playsinline></video>
+        <canvas id="trackingCanvas"></canvas>
+      </div>
+
+      <!-- Real-time Interactive Piano Roll -->
+      <div class="piano-roll" id="pianoRoll">
+        <div class="piano-key" id="key-C4">C4</div>
+        <div class="piano-key" id="key-D4">D4</div>
+        <div class="piano-key" id="key-E4">E4</div>
+        <div class="piano-key" id="key-F4">F4</div>
+        <div class="piano-key" id="key-G4">G4</div>
+        <div class="piano-key" id="key-A4">A4</div>
+        <div class="piano-key" id="key-B4">B4</div>
+        <div class="piano-key" id="key-C5">C5</div>
+      </div>
+
+      <!-- Real-time Oscilloscope -->
+      <div class="visualizer-container">
+        <canvas id="audioScopeCanvas"></canvas>
+      </div>
+
+      <div class="live-transcript-box">
+        <div class="box-label">Live Recognized Sign Chain:</div>
+        <div class="gesture-pills" id="gesturePillList">
+          <span style="color: var(--muted); font-size: 12px;">Hold signs in front of the camera to queue...</span>
+        </div>
+        <div class="box-label" style="margin-top: 4px;">AI Synthesized Expression:</div>
+        <div class="active-sentence" id="spokenPhraseOutput">"Ready to speak..."</div>
+      </div>
+
+      <div class="control-row">
+        <button class="btn btn-primary" onclick="speakCurrentPhrase()">
+          🔊 Speak Out Loud
+        </button>
+        <button class="btn btn-outline" onclick="clearGestureChain()">
+          🧹 Clear Buffer
+        </button>
+      </div>
+    </div>
+
+    <!-- Channel B -->
+    <div class="deck">
+      <div class="deck-header">
+        <div class="deck-title"><span>🗣️ CHANNEL B:</span> Spoken Speech $\to$ Visual Sign</div>
+        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--primary);">VOICE RECOGNIZER</span>
+      </div>
+
+      <div class="sign-visualizer-box" id="signDisplay">
+        <div class="sign-illustration" id="signEmoji">👋</div>
+        <div class="sign-word-display" id="signWord">"HELLO"</div>
+        <p style="position: absolute; bottom: 12px; font-size: 11px; color: var(--muted);" id="signSubtext">
+          Standard American Sign Language (ASL)
+        </p>
+      </div>
+
+      <div class="audio-feed-box">
+        <div class="box-label">Spoken Audio Transcript:</div>
+        <div style="font-size: 14px; min-height: 44px; color: #cbd5e1; line-height: 1.4;" id="hearingSpeechTranscript">
+          Tap microphone and speak into your device...
+        </div>
+
+        <button class="mic-toggle-btn" id="micBtn" onclick="toggleSpeechRecognition()">
+          🎙️ Start Listening (Speak Here)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentLanguage = 'en-US';
+  let activeGestureChain = [];
+  let lastDetectedGesture = null;
+  let gestureHoldCounter = 0;
+  const GESTURE_THRESHOLD_FRAMES = 7;
+  let musicModeEnabled = true;
+  let currentInstrument = 'sine';
+
+  let SIGN_DICTIONARY = {};
+
+  const videoElement = document.getElementById('webcam');
+  const canvasElement = document.getElementById('trackingCanvas');
+  const canvasCtx = canvasElement.getContext('2d');
+  const detectedGestureLabel = document.getElementById('detectedGestureLabel');
+  const gesturePillList = document.getElementById('gesturePillList');
+  const spokenPhraseOutput = document.getElementById('spokenPhraseOutput');
+  const cameraStatus = document.getElementById('cameraStatus');
+  const dbgHands = document.getElementById('dbgHands');
+  const dbgFingers = document.getElementById('dbgFingers');
+
+  const signEmoji = document.getElementById('signEmoji');
+  const signWord = document.getElementById('signWord');
+  const hearingSpeechTranscript = document.getElementById('hearingSpeechTranscript');
+  const micBtn = document.getElementById('micBtn');
+  const musicToggleBtn = document.getElementById('musicToggleBtn');
+  const instrumentSelect = document.getElementById('instrumentSelect');
+
+  const scopeCanvas = document.getElementById('audioScopeCanvas');
+  const scopeCtx = scopeCanvas.getContext('2d');
+
+  // Web Audio Synthesizer & Real-time Analyzer
+  const AudioSynthesizer = {
+    ctx: null,
+    analyzer: null,
+    dataArray: null,
+    init() {
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.analyzer = this.ctx.createAnalyser();
+        this.analyzer.fftSize = 256;
+        this.dataArray = new Uint8Array(this.analyzer.frequencyBinCount);
+        drawOscilloscope();
+      }
+    },
+    playNote(freq, noteName) {
+      if (!musicModeEnabled) return;
+      this.init();
+
+      // Trigger Key Highlight
+      highlightPianoKey(noteName);
+
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = currentInstrument;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.analyzer);
+      this.analyzer.connect(this.ctx.destination);
+
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.35);
+    }
+  };
+
+  function highlightPianoKey(note) {
+    if (!note) return;
+    const key = document.getElementById(`key-${note}`);
+    if (key) {
+      key.classList.add('active');
+      setTimeout(() => key.classList.remove('active'), 250);
+    }
+  }
+
+  // Draw Audio Waveform Oscilloscope
+  function drawOscilloscope() {
+    requestAnimationFrame(drawOscilloscope);
+    scopeCanvas.width = scopeCanvas.clientWidth || 300;
+    scopeCanvas.height = scopeCanvas.clientHeight || 50;
+
+    if (!AudioSynthesizer.analyzer) {
+      scopeCtx.fillStyle = '#080c14';
+      scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+      return;
+    }
+
+    AudioSynthesizer.analyzer.getByteTimeDomainData(AudioSynthesizer.dataArray);
+    scopeCtx.fillStyle = '#080c14';
+    scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+    scopeCtx.lineWidth = 2;
+    scopeCtx.strokeStyle = '#38bdf8';
+    scopeCtx.beginPath();
+
+    const sliceWidth = scopeCanvas.width / AudioSynthesizer.analyzer.frequencyBinCount;
+    let x = 0;
+
+    for (let i = 0; i < AudioSynthesizer.analyzer.frequencyBinCount; i++) {
+      const v = AudioSynthesizer.dataArray[i] / 128.0;
+      const y = (v * scopeCanvas.height) / 2;
+      if (i === 0) scopeCtx.moveTo(x, y);
+      else scopeCtx.lineTo(x, y);
+      x += sliceWidth;
+    }
+
+    scopeCtx.lineTo(scopeCanvas.width, scopeCanvas.height / 2);
+    scopeCtx.stroke();
+  }
+
+  function toggleMusicMode() {
+    musicModeEnabled = !musicModeEnabled;
+    musicToggleBtn.classList.toggle('active', musicModeEnabled);
+    musicToggleBtn.textContent = musicModeEnabled ? '🎵 Sonic Audio: ON' : '🔇 Sonic Audio: OFF';
+  }
+
+  function changeInstrument() {
+    currentInstrument = instrumentSelect.value;
+  }
+
+  async function loadSignDictionary() {
+    try {
+      const res = await fetch('/signs.json');
+      const data = await res.json();
+      data.vocabulary.forEach((item) => {
+        SIGN_DICTIONARY[item.id] = item;
+      });
+    } catch (e) {
+      console.warn('Using local dataset.');
+    }
+  }
+
+  // MediaPipe Hands Initialization with MULTI-HAND TRACKING
+  const hands = new Hands({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.60,
+    minTrackingConfidence: 0.60
+  });
+
+  hands.onResults(onHandResults);
+
+  const camera = new Camera(videoElement, {
+    onFrame: async () => {
+      await hands.send({ image: videoElement });
+    },
+    width: 640,
+    height: 480
+  });
+
+  camera.start()
+    .then(() => { cameraStatus.textContent = 'DUAL SENSORS (60 FPS)'; })
+    .catch(() => { cameraStatus.textContent = 'CAMERA BLOCKED'; });
+
+  function onHandResults(results) {
+    canvasElement.width = videoElement.videoWidth || 640;
+    canvasElement.height = videoElement.videoHeight || 480;
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+    const numHands = results.multiHandLandmarks ? results.multiHandLandmarks.length : 0;
+    dbgHands.textContent = numHands;
+
+    if (numHands > 0) {
+      results.multiHandLandmarks.forEach((landmarks, idx) => {
+        drawHandSkeleton(landmarks, canvasCtx, canvasElement.width, canvasElement.height, idx === 1);
+      });
+
+      const primaryHand = results.multiHandLandmarks[0];
+      const status = getFingerStatus(primaryHand);
+      dbgFingers.textContent = `${status.count} (${status.thumb?'T':''}${status.index?'I':''}${status.middle?'M':''}${status.ring?'R':''}${status.pinky?'P':''})`;
+
+      const gesture = classifyGesture(primaryHand, status);
+      if (gesture) {
+        detectedGestureLabel.textContent = `DETECTED: ${gesture}`;
+        handleGestureDwell(gesture);
+      } else {
+        detectedGestureLabel.textContent = `FINGERS UP: ${status.count}`;
+        gestureHoldCounter = 0;
+      }
+    } else {
+      detectedGestureLabel.textContent = 'NO HAND IN VIEW';
+      dbgFingers.textContent = '0';
+      gestureHoldCounter = 0;
+    }
+    canvasCtx.restore();
+  }
+
+  function drawHandSkeleton(landmarks, ctx, w, h, isSecondary) {
+    const CONNECTIONS = [
+      [0,1],[1,2],[2,3],[3,4],
+      [0,5],[5,6],[6,7],[7,8],
+      [5,9],[9,10],[10,11],[11,12],
+      [9,13],[13,14],[14,15],[15,16],
+      [13,17],[17,18],[18,19],[19,20],
+      [0,17]
+    ];
+
+    ctx.strokeStyle = isSecondary ? '#a855f7' : '#38bdf8';
+    ctx.lineWidth = 3;
+    CONNECTIONS.forEach(([i, j]) => {
+      ctx.beginPath();
+      ctx.moveTo(landmarks[i].x * w, landmarks[i].y * h);
+      ctx.lineTo(landmarks[j].x * w, landmarks[j].y * h);
+      ctx.stroke();
+    });
+
+    landmarks.forEach((pt) => {
+      ctx.beginPath();
+      ctx.arc(pt.x * w, pt.y * h, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = isSecondary ? '#f43f5e' : '#818cf8';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  }
+
+  // Radial Euclidean distance checks
+  function getFingerStatus(lm) {
+    const wrist = lm[0];
+    const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+    const indexUp = dist(lm[8], wrist) > dist(lm[6], wrist) * 1.15;
+    const middleUp = dist(lm[12], wrist) > dist(lm[10], wrist) * 1.15;
+    const ringUp = dist(lm[16], wrist) > dist(lm[14], wrist) * 1.15;
+    const pinkyUp = dist(lm[20], wrist) > dist(lm[18], wrist) * 1.15;
+    const thumbUp = dist(lm[4], lm[17]) > dist(lm[2], lm[17]) * 1.25;
+
+    const count = (thumbUp?1:0) + (indexUp?1:0) + (middleUp?1:0) + (ringUp?1:0) + (pinkyUp?1:0);
+    return { thumb: thumbUp, index: indexUp, middle: middleUp, ring: ringUp, pinky: pinkyUp, count };
+  }
+
+  function classifyGesture(lm, st) {
+    const wrist = lm[0];
+    const thumbTip = lm[4];
+
+    if (st.count === 5) return 'OPEN PALM / HELLO';
+    if (st.count === 0) return 'CLOSED FIST / YES';
+
+    if (st.count === 1 && st.thumb) {
+      return (thumbTip.y < wrist.y) ? 'THUMBS UP / GOOD' : 'THUMBS DOWN / NO';
+    }
+
+    if (st.count === 1 && st.index) return 'INDEX POINT / ONE';
+    if (st.count === 2 && st.index && st.middle) return 'VICTORY / PEACE';
+    if (st.count === 3 && st.index && st.middle && st.ring) return 'THREE FINGERS / WATER';
+    if (st.count === 3 && st.thumb && st.index && st.pinky) return 'I LOVE YOU';
+    if (st.count === 2 && st.index && st.pinky) return 'ROCK ON';
+    if (st.count === 2 && st.thumb && st.pinky) return 'CALL ME / SHAKA';
+
+    return null;
+  }
+
+  function handleGestureDwell(gesture) {
+    if (gesture === lastDetectedGesture) {
+      gestureHoldCounter++;
+      if (gestureHoldCounter === GESTURE_THRESHOLD_FRAMES) {
+        // Trigger Music Sound
+        const signData = SIGN_DICTIONARY[gesture];
+        if (signData) {
+          AudioSynthesizer.playNote(signData.sound_frequency, signData.musical_note);
+        }
+        pushGestureToQueue(gesture);
+      }
+    } else {
+      lastDetectedGesture = gesture;
+      gestureHoldCounter = 0;
+    }
+  }
+
+  function pushGestureToQueue(gesture) {
+    activeGestureChain.push(gesture);
+    renderPills();
+    fetchEnhancedSentence();
+  }
+
+  function renderPills() {
+    gesturePillList.innerHTML = '';
+    activeGestureChain.forEach((g) => {
+      const pill = document.createElement('span');
+      pill.className = 'pill';
+      pill.textContent = g;
+      gesturePillList.appendChild(pill);
+    });
+  }
+
+  function clearGestureChain() {
+    activeGestureChain = [];
+    renderPills();
+    spokenPhraseOutput.textContent = '"Ready to speak..."';
+  }
+
+  async function fetchEnhancedSentence() {
+    if (activeGestureChain.length === 0) return;
+
+    try {
+      const res = await fetch('/api/enhance-phrase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rawGestures: activeGestureChain,
+          targetLanguage: currentLanguage
+        })
+      });
+
+      const data = await res.json();
+      if (data.enhancedText) {
+        spokenPhraseOutput.textContent = `"${data.enhancedText}"`;
+      }
+    } catch (e) {
+      spokenPhraseOutput.textContent = `"${activeGestureChain.join(' ')}"`;
+    }
+  }
+
+  function speakCurrentPhrase() {
+    const textToSpeak = spokenPhraseOutput.textContent.replace(/"/g, '');
+    if (!textToSpeak || textToSpeak === 'Ready to speak...') return;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = currentLanguage;
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Channel B: Speech Recognition
+  let recognition = null;
+  let isRecording = false;
+
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+      let speechResult = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        speechResult += event.results[i][0].transcript;
+      }
+      hearingSpeechTranscript.textContent = `"${speechResult}"`;
+      parseSpeechToSign(speechResult.toUpperCase());
+    };
+
+    recognition.onerror = () => stopMic();
+  }
+
+  function toggleSpeechRecognition() {
+    if (!recognition) {
+      alert('Speech recognition requires Chrome or Edge.');
+      return;
+    }
+    isRecording ? stopMic() : startMic();
+  }
+
+  function startMic() {
+    recognition.lang = currentLanguage;
+    recognition.start();
+    isRecording = true;
+    micBtn.classList.add('recording');
+    micBtn.textContent = '⏹️ Stop Listening (Processing...)';
+  }
+
+  function stopMic() {
+    if (recognition) recognition.stop();
+    isRecording = false;
+    micBtn.classList.remove('recording');
+    micBtn.textContent = '🎙️ Start Listening (Speak Here)';
+  }
+
+  function parseSpeechToSign(spokenText) {
+    const words = spokenText.split(/\s+/);
+    for (let word of words) {
+      const clean = word.replace(/[^A-Z]/g, '');
+      if (SIGN_DICTIONARY[clean]) {
+        const item = SIGN_DICTIONARY[clean];
+        signEmoji.textContent = item.visual;
+        signWord.textContent = `"${item.id}"`;
+        const localized = item.translations[currentLanguage] || item.id;
+        document.getElementById('signSubtext').textContent = `${item.asl_description} (${localized})`;
+        signEmoji.style.animation = 'none';
+        setTimeout(() => { signEmoji.style.animation = 'popInOut 0.3s ease'; }, 10);
+        break;
+      }
+    }
+  }
+
+  function changeLanguage() {
+    currentLanguage = document.getElementById('targetLangSelect').value;
+    if (isRecording) {
+      stopMic();
+      startMic();
+    }
+    if (activeGestureChain.length > 0) {
+      fetchEnhancedSentence();
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', loadSignDictionary);
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('PWA Service Worker Registered'))
+        .catch((err) => console.log('Service Worker Failed:', err));
+    });
+  }
+</script>
+<button class="select-ctrl" id="pwaInstallBtn" style="display:none; background: #38bdf8; color: #000; font-weight: bold;">
+  📲 Install App
+</button>
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('pwaInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) installBtn.style.display = 'block';
+    });
+
+    installBtn?.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+  </script>
+</body>
+</html>
+</body>
+</html>
